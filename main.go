@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/joho/godotenv"
 )
 
 // type ResponseData struct {
@@ -17,12 +18,22 @@ import (
 
 const prefix string = "!gobot"
 const weather string = "!weather"
-var city string
 
 func main() {
 
+	err := godotenv.Load()
 
-	session, err := discordgo.New("Bot MTEzMjc5OTE2ODI5ODA5ODgwMA.G0Xb_U.cbqXVj_71r94x0RfPjomLYzPUFZQu6x-gOACQY")
+	TOKEN := os.Getenv("TOKEN")
+
+	if err != nil {
+    	log.Fatalf("Error loading .env file: %s", err)
+	}
+
+	bot := fmt.Sprintf("Bot %s", TOKEN)
+
+	fmt.Println(bot)
+
+	session, err := discordgo.New(bot)
 	if err != nil{
 		log.Fatal(err)
 	}
