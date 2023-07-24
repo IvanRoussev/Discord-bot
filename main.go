@@ -48,6 +48,13 @@ func main() {
 			return
 		}
 
+		if m.Content == prefix + " help" {
+			s.ChannelMessageSend(m.ChannelID, "Here's help")
+		}
+
+		if m.Content == "!rules" {
+			s.ChannelMessageSend(m.ChannelID, "Rules...")
+		}
 
 
 		fmt.Println(m.Content)
@@ -61,13 +68,16 @@ func main() {
 				return
 			}
 			formatedData := parseWeather(weatherData)
-			s.ChannelMessageSend(m.ChannelID, formatedData)
+			// s.ChannelMessageSend(m.ChannelID, formatedData)
+
+			embed := &discordgo.MessageEmbed{
+				Title: "Current Weather",
+				Description: formatedData,
+				Color: 0x00ff00,
+			}
+
+			s.ChannelMessageSendEmbed(m.ChannelID, embed)
 		}
-
-
-
-
-
 
 	})
 
