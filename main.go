@@ -43,43 +43,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	session.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate)  {
-		if m.Author.ID == s.State.User.ID {
-			return
-		}
-
-		if m.Content == prefix + " help" {
-			s.ChannelMessageSend(m.ChannelID, "Here's help")
-		}
-
-		if m.Content == "!rules" {
-			s.ChannelMessageSend(m.ChannelID, "Rules...")
-		}
-
-
-		fmt.Println(m.Content)
-		
-		if strings.HasPrefix(m.Content, weather) {
-			location := strings.TrimSpace(strings.TrimPrefix(m.Content, weather))
-			url := fmt.Sprintf("http://api.weatherapi.com/v1/current.json?key=e872b5e879f04cb393a54523230505&q=%s&aqi=no", location)
-			weatherData, err := getWeatherData(url)
-			if err != nil {
-				fmt.Println("Error:", err)
-				return
-			}
-			formatedData := parseWeather(weatherData)
-			// s.ChannelMessageSend(m.ChannelID, formatedData)
-
-			embed := &discordgo.MessageEmbed{
-				Title: "Current Weather",
-				Description: formatedData,
-				Color: 0x00ff00,
-			}
-
-			s.ChannelMessageSendEmbed(m.ChannelID, embed)
-		}
-
-	})
+	session.AddHandler(handleMessage)
 
 	session.Identify.Intents = discordgo.IntentsAllWithoutPrivileged
 
@@ -101,6 +65,51 @@ func main() {
 
 	
 
+}
+
+
+
+func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
+	defer func() {
+		if err := recover(); err != nil{
+			log.Println("Error:", err)
+		}
+	}()
+
+	if m.Author.ID == s.State.User.ID {
+		return
+	}
+
+	if m.Content == prefix + " help" {
+		s.ChannelMessageSend(m.ChannelID, "Here's help")
+	}
+
+	if m.Content == "!rules" {
+		s.ChannelMessageSend(m.ChannelID, "Rules...")
+	}
+
+
+	fmt.Println(m.Content)
+	
+	if strings.HasPrefix(m.Content, weather) {
+		location := strings.TrimSpace(strings.TrimPrefix(m.Content, weather))
+		url := fmt.Sprintf("http://api.weatherapi.com/v1/current.json?key=e872b5e879f04cb393a54523230505&q=%s&aqi=no", location)
+		weatherData, err := getWeatherData(url)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+		formatedData := parseWeather(weatherData)
+		// s.ChannelMessageSend(m.ChannelID, formatedData)
+
+		embed := &discordgo.MessageEmbed{
+			Title: "Current Weather",
+			Description: formatedData,
+			Color: 0x00ff00,
+		}
+
+		s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	}
 }
 
 
