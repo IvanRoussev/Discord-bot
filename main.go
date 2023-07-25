@@ -117,25 +117,31 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		
 
-		formatedData := parseWeather(weatherData)
+		formatedData, img := parseWeather(weatherData)
 		// s.ChannelMessageSend(m.ChannelID, formatedData)
+
+		if len(img) == 0 {
+			fmt.Println("IMAGE URL COULDNT BE FOUND")
+		}
+
+		fmt.Println(img)
 
 		embed := &discordgo.MessageEmbed{
 			Title: "Current Weather",
+			Image: &discordgo.MessageEmbedImage{
+				URL: img,
+			},
 			Description: formatedData,
 			Color: 0x00ff00,
 		}
 
 		s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	}
-
-
-
 }
 
 
 
-func parseWeather(data *WeatherData) string{
+func parseWeather(data *WeatherData) (string, string) {
 	location := fmt.Sprintf("%s, %s, %s\n", data.Location.Name, data.Location.Region, data.Location.Country)
 	time := fmt.Sprintf("Local Time: %s\n", data.Location.Localtime)
 	condition := data.Current.Condition.Text
@@ -143,5 +149,9 @@ func parseWeather(data *WeatherData) string{
 	uv := fmt.Sprintf("%.1f UV\n", data.Current.UVIndex)
 	wind := fmt.Sprintf("%.1f %s\n", data.Current.WindKph, data.Current.WindDirection)
 
-	return location + time + condition + "\n" + temp + uv + wind
+	imgUrl := data.Current.Condition.Icon
+	imgUrl = strings.Replace(imgUrl, "//", "http://", 1)
+	
+
+	return location + time + condition + "\n" + temp + uv + wind, imgUrl
 }
