@@ -55,6 +55,11 @@ type WeatherData struct {
 
 func getWeatherData(url string) (*WeatherData, error) {
 
+	// if len(url) != 0  {
+	// 	fmt.Println("No URL PROVIDED")
+	// 	return nil, nil
+	// }
+
 	resp, err := http.Get(url)
 
 	if err != nil{

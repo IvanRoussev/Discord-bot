@@ -59,12 +59,6 @@ func main() {
 	sessionConn := make(chan os.Signal, 1)
 	signal.Notify(sessionConn, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sessionConn
-
-	
-		
-
-	
-
 }
 
 
@@ -72,11 +66,32 @@ func main() {
 func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	defer func() {
 		if err := recover(); err != nil{
-			log.Println("Error:", err)
+
+			/* MAKE THIS BETTER, Hard Coded this
+			
+			Sends error that location needs to be provided, 
+			but what if theres diferent error, 
+			that message will be sent for all errors
+			
+			
+			*/
+			
+
+			log.Println(err)
+
+			fmt.Println("Provide a Location")
+			embed := &discordgo.MessageEmbed{
+				Title: "Error",
+				Description: "Please Provide a Location! Thanks ;)",
+			}
+	
+			s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			
 		}
 	}()
 
 	if m.Author.ID == s.State.User.ID {
+		// means that the bot itself sent the message, and there's no need for the bot to process its own messages.
 		return
 	}
 
@@ -95,10 +110,13 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 		location := strings.TrimSpace(strings.TrimPrefix(m.Content, weather))
 		url := fmt.Sprintf("http://api.weatherapi.com/v1/current.json?key=e872b5e879f04cb393a54523230505&q=%s&aqi=no", location)
 		weatherData, err := getWeatherData(url)
+
 		if err != nil {
 			fmt.Println("Error:", err)
-			return
 		}
+
+		
+
 		formatedData := parseWeather(weatherData)
 		// s.ChannelMessageSend(m.ChannelID, formatedData)
 
@@ -110,17 +128,20 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		s.ChannelMessageSendEmbed(m.ChannelID, embed)
 	}
+
+
+
 }
 
 
 
 func parseWeather(data *WeatherData) string{
+	location := fmt.Sprintf("%s, %s, %s\n", data.Location.Name, data.Location.Region, data.Location.Country)
+	time := fmt.Sprintf("Local Time: %s\n", data.Location.Localtime)
 	condition := data.Current.Condition.Text
 	temp := fmt.Sprintf("%.1f°C\n", data.Current.TemperatureC)
 	uv := fmt.Sprintf("%.1f UV\n", data.Current.UVIndex)
 	wind := fmt.Sprintf("%.1f %s\n", data.Current.WindKph, data.Current.WindDirection)
-	location := fmt.Sprintf("%s, %s, %s\n", data.Location.Name, data.Location.Region, data.Location.Country)
-	time := fmt.Sprintf("Local Time: %s\n", data.Location.Localtime)
 
-	return condition + "\n" + temp + uv + wind + location + time
+	return location + time + condition + "\n" + temp + uv + wind
 }
