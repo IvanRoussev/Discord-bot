@@ -12,10 +12,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// type ResponseData struct {
-// 	City string `json:"name"`
-// }
-
 const prefix string = "!gobot"
 const weather string = "!weather"
 
@@ -31,7 +27,7 @@ func main() {
 
 	bot := fmt.Sprintf("Bot %s", TOKEN)
 
-	fmt.Println(bot)
+	// fmt.Println(bot)
 
 	session, err := discordgo.New(bot)
 	if err != nil{
@@ -142,15 +138,18 @@ func handleMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 
 func parseWeather(data *WeatherData) (string, string) {
+
+	imgUrl := data.Current.Condition.Icon
+	imgUrl = strings.Replace(imgUrl, "//", "http://", 1)
+
+
 	location := fmt.Sprintf("%s, %s, %s\n", data.Location.Name, data.Location.Region, data.Location.Country)
 	time := fmt.Sprintf("Local Time: %s\n", data.Location.Localtime)
 	condition := data.Current.Condition.Text
 	temp := fmt.Sprintf("%.1f°C\n", data.Current.TemperatureC)
 	uv := fmt.Sprintf("%.1f UV\n", data.Current.UVIndex)
-	wind := fmt.Sprintf("%.1f %s\n", data.Current.WindKph, data.Current.WindDirection)
+	wind := fmt.Sprintf("Wind: %.1f %s\n", data.Current.WindKph, data.Current.WindDirection)
 
-	imgUrl := data.Current.Condition.Icon
-	imgUrl = strings.Replace(imgUrl, "//", "http://", 1)
 	
 
 	return location + time + condition + "\n" + temp + uv + wind, imgUrl
